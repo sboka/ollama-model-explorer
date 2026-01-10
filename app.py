@@ -71,6 +71,7 @@ def inspect_model(base_url: str, model_info: Dict[str, Any]) -> Dict[str, Any]:
     try:
         details = get_model_details(base_url, model_name)
         model_details = details.get("details", {})
+        model_family = model_details.get("family", "")
 
         return {
             "name": model_name,
@@ -78,13 +79,17 @@ def inspect_model(base_url: str, model_info: Dict[str, Any]) -> Dict[str, Any]:
             "size": model_info.get("size", 0),
             "size_formatted": format_size(model_info.get("size", 0)),
             "modified_at": model_info.get("modified_at", ""),
+            "max_context": int(
+                details.get("model_info", {}).get(f"{model_family}.context_length", 0)
+                / 1024
+            ),
             "digest": (
                 model_info.get("digest", "")[:12] if model_info.get("digest") else ""
             ),
             "capabilities": details.get("capabilities", []),
             "parameters": model_details.get("parameter_size", ""),
             "quantization": model_details.get("quantization_level", ""),
-            "family": model_details.get("family", ""),
+            "family": model_family,
             "format": model_details.get("format", ""),
             "parent_model": model_details.get("parent_model", ""),
         }

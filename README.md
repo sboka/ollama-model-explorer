@@ -5,10 +5,14 @@ A modern web application for exploring and filtering models across multiple Olla
 ## Project Structure
 
 ```
-ollama-explorer/
+ollama-models-explorer/
 ├── app.py
+├── static/
+│   ├── script.js
+│   └── style.css
 ├── templates/
 │   └── index.html
+├── README.md
 └── requirements.txt
 ```
 
