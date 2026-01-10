@@ -79,8 +79,8 @@ def inspect_model(base_url: str, model_info: Dict[str, Any]) -> Dict[str, Any]:
             "size": model_info.get("size", 0),
             "size_formatted": format_size(model_info.get("size", 0)),
             "modified_at": model_info.get("modified_at", ""),
-            "max_context": int(
-                details.get("model_info", {}).get(f"{model_family}.context_length", 0)
+            "max_context": (
+                details.get("model_info", {}).get(f"{model_family}.context_length", 0.0)
                 / 1024
             ),
             "digest": (
