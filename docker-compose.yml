@@ -19,6 +19,9 @@ services:
       - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
     networks:
       - ollama-network
+    extra_hosts:
+      # This maps 'host.docker.internal' to your host machine
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')" ]
       interval: 30s
@@ -39,6 +42,7 @@ services:
 
 networks:
   ollama-network:
+    name: ollama-network
     driver: bridge
 
 # volumes:
