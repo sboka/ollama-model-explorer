@@ -78,15 +78,27 @@ class TestIndexEndpoint:
 class TestFetchEndpoint:
     """Tests for the fetch models API endpoint."""
 
-    def test_fetch_requires_json(self, client):
-        """Test that fetch endpoint requires JSON."""
+    def test_fetch_requires_json_content_type(self, client):
+        """Test that fetch endpoint requires JSON content type."""
         response = client.post("/api/fetch")
+        # Flask returns 415 when Content-Type is not application/json
+        assert response.status_code == 415
+
+    def test_fetch_requires_valid_json(self, client):
+        """Test that fetch endpoint requires valid JSON body."""
+        response = client.post(
+            "/api/fetch",
+            data="not valid json",
+            content_type="application/json"
+        )
         assert response.status_code == 400
 
     def test_fetch_requires_servers(self, client):
         """Test that fetch endpoint requires servers list."""
         response = client.post(
-            "/api/fetch", data=json.dumps({}), content_type="application/json"
+            "/api/fetch",
+            data=json.dumps({}),
+            content_type="application/json"
         )
         assert response.status_code == 400
         data = json.loads(response.data)
@@ -97,7 +109,7 @@ class TestFetchEndpoint:
         response = client.post(
             "/api/fetch",
             data=json.dumps({"servers": ["", "   "]}),
-            content_type="application/json",
+            content_type="application/json"
         )
         assert response.status_code == 400
 
@@ -114,15 +126,15 @@ class TestFetchEndpoint:
                     "capabilities": ["completion"],
                     "family": "llama",
                     "size": 3826793472,
-                    "size_formatted": "3.6 GB",
+                    "size_formatted": "3.6 GB"
                 }
-            ],
+            ]
         }
 
         response = client.post(
             "/api/fetch",
             data=json.dumps({"servers": ["http://localhost:11434"]}),
-            content_type="application/json",
+            content_type="application/json"
         )
 
         assert response.status_code == 200
@@ -131,7 +143,6 @@ class TestFetchEndpoint:
         assert "capabilities" in data
         assert "families" in data
         assert "server_results" in data
-
 
 class TestNormalizeUrl:
     """Tests for URL normalization."""
