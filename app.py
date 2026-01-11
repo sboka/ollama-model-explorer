@@ -106,7 +106,7 @@ def inspect_model(base_url: str, model_info: Dict[str, Any]) -> Dict[str, Any]:
         context_length = None
         for key, value in model_info_data.items():
             if "context_length" in key.lower():
-                context_length = value / 1024
+                context_length = value
                 break
 
         return {
@@ -124,7 +124,8 @@ def inspect_model(base_url: str, model_info: Dict[str, Any]) -> Dict[str, Any]:
             "family": model_details.get("family", ""),
             "format": model_details.get("format", ""),
             "parent_model": model_details.get("parent_model", ""),
-            "max_context": context_length,
+            "context_length": context_length,
+            "context_length_formatted": context_length / 1024,
         }
     except Exception as e:
         logger.warning(f"Failed to inspect model '{model_name}': {e}")

@@ -390,12 +390,12 @@ function renderModels() {
                                 ${escapeHtml(model.family)}
                             </span>
                         ` : ''}
-                        ${model.max_context ? `
+                        ${model.context_length ? `
                             <span class="model-meta-item">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h12M4 18h8"/>
                                 </svg>
-                                ${escapeHtml(model.max_context)}K
+                                ${escapeHtml(model.context_length_formatted)}K
                             </span>
                         ` : ''}
                     </div>
@@ -595,7 +595,7 @@ function exportJSON(filename) {
             parameters: model.parameters || null,
             quantization: model.quantization || null,
             family: model.family || null,
-            max_context: model.max_context || null,
+            context_length: model.context_length || null,
             capabilities: model.capabilities || [],
             modified_at: model.modified_at || null
         }))
@@ -627,7 +627,7 @@ function exportCSV(filename) {
         escapeCsvField(model.server),
         escapeCsvField(model.size_formatted || ''),
         escapeCsvField(model.parameters || ''),
-        escapeCsvField(model.max_context ? `${model.max_context}` : ''),
+        escapeCsvField(model.context_length ? `${model.context_length}` : ''),
         escapeCsvField(model.quantization || ''),
         escapeCsvField(model.family || ''),
         escapeCsvField((model.capabilities || []).join('; ')),
@@ -689,7 +689,7 @@ function exportMarkdown(filename) {
     filteredModels.forEach(model => {
         const capabilities = (model.capabilities || []).map(c => `\`${c}\``).join(' ') || '-';
         const serverHost = extractHost(model.server);
-        const contextSize = model.max_context ? `${(model.max_context / 1024).toFixed(0)}K` : '-';
+        const contextSize = model.context_length ? `${model.context_length_formatted}K` : '-';
         lines.push(
             `| ${model.name} | ${serverHost} | ${model.size_formatted || '-'} | ${model.parameters || '-'} | ${contextSize} | ${model.family || '-'} | ${capabilities} |`
         );
@@ -713,7 +713,7 @@ function copyToClipboard() {
             capabilities: model.capabilities || [],
             family: model.family || null,
             parameters: model.parameters || null,
-            max_context: model.max_context || null
+            context_length: model.context_length || null
         }))
     };
 
