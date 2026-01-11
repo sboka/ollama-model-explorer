@@ -186,6 +186,7 @@ ollama-model-explorer/
 │   └── test_app.py     # Application tests
 ├── Dockerfile          # Docker configuration
 ├── docker-compose.yml  # Docker Compose configuration
+├── entrypoint.sh       # Docker Container Entrypoint script
 ├── Makefile            # Make commands
 ├── pyproject.toml      # Python project configuration
 ├── requirements.txt    # Production dependencies
