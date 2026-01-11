@@ -595,6 +595,7 @@ function exportJSON(filename) {
             parameters: model.parameters || null,
             quantization: model.quantization || null,
             family: model.family || null,
+            max_context: model.max_context || null,
             capabilities: model.capabilities || [],
             modified_at: model.modified_at || null
         }))
@@ -614,6 +615,7 @@ function exportCSV(filename) {
         'Server',
         'Size',
         'Parameters',
+        'Context',
         'Quantization',
         'Family',
         'Capabilities',
@@ -625,6 +627,7 @@ function exportCSV(filename) {
         escapeCsvField(model.server),
         escapeCsvField(model.size_formatted || ''),
         escapeCsvField(model.parameters || ''),
+        escapeCsvField(model.max_context ? `${model.max_context}` : ''),
         escapeCsvField(model.quantization || ''),
         escapeCsvField(model.family || ''),
         escapeCsvField((model.capabilities || []).join('; ')),
@@ -680,14 +683,15 @@ function exportMarkdown(filename) {
 
     lines.push('## Models');
     lines.push('');
-    lines.push('| Name | Server | Size | Parameters | Family | Capabilities |');
-    lines.push('|------|--------|------|------------|--------|--------------|');
+    lines.push('| Name | Server | Size | Parameters | Context | Family | Capabilities |');
+    lines.push('|------|--------|------|------------|---------|--------|--------------|');
 
     filteredModels.forEach(model => {
         const capabilities = (model.capabilities || []).map(c => `\`${c}\``).join(' ') || '-';
         const serverHost = extractHost(model.server);
+        const contextSize = model.max_context ? `${(model.max_context / 1024).toFixed(0)}K` : '-';
         lines.push(
-            `| ${model.name} | ${serverHost} | ${model.size_formatted || '-'} | ${model.parameters || '-'} | ${model.family || '-'} | ${capabilities} |`
+            `| ${model.name} | ${serverHost} | ${model.size_formatted || '-'} | ${model.parameters || '-'} | ${contextSize} | ${model.family || '-'} | ${capabilities} |`
         );
     });
 
@@ -708,7 +712,8 @@ function copyToClipboard() {
             server: model.server,
             capabilities: model.capabilities || [],
             family: model.family || null,
-            parameters: model.parameters || null
+            parameters: model.parameters || null,
+            max_context: model.max_context || null
         }))
     };
 
