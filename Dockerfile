@@ -1,5 +1,4 @@
 # Ollama Model Explorer - Minimal Alpine Dockerfile
-# Target size: ~35-45MB
 
 # Build stage
 FROM python:3.12-alpine AS builder
@@ -42,9 +41,12 @@ COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy application files
-COPY --chown=appuser:appgroup app.py config.py wsgi.py ./
+COPY --chown=appuser:appgroup app.py config.py wsgi.py entrypoint.sh ./
 COPY --chown=appuser:appgroup templates/ ./templates/
 COPY --chown=appuser:appgroup static/ ./static/
+
+# Make executable
+RUN chmod +x entrypoint.sh
 
 # Switch to non-root user
 USER appuser
@@ -63,4 +65,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=3s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:5000/health || exit 1
 
-CMD ["sh", "-c", "gunicorn --bind ${HOST}:${PORT} --workers ${WORKERS} --threads 2 --access-logfile - wsgi:app"]
+# CMD ["sh", "-c", "gunicorn --bind ${HOST}:${PORT} --workers ${WORKERS} --threads 2 --access-logfile - wsgi:app"]
+ENTRYPOINT ["./entrypoint.sh"]
