@@ -31,20 +31,65 @@ const matchAllToggle = document.getElementById('matchAllToggle');
 const viewToggle = document.querySelector('.view-toggle');
 const clearAllFilters = document.getElementById('clearAllFilters');
 
+// LocalStorage key for servers
+const STORAGE_KEY = 'ollama-explorer-servers';
+
+// Save servers to localStorage
+function saveServers() {
+    const servers = getServerUrls();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(servers));
+}
+
+// Load servers from localStorage
+function loadServers() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            const servers = JSON.parse(saved);
+            if (Array.isArray(servers) && servers.length > 0) {
+                // Clear existing inputs
+                serverInputsContainer.innerHTML = '';
+
+                // Add a row for each saved server
+                servers.forEach((url, index) => {
+                    const row = document.createElement('div');
+                    row.className = 'server-row';
+                    row.innerHTML = `
+                        <input type="text" class="server-input" placeholder="http://hostname:11434" value="${escapeHtml(url)}">
+                        <button class="btn btn-icon btn-danger remove-server" title="Remove server">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    `;
+                    serverInputsContainer.appendChild(row);
+                });
+
+                updateRemoveButtons();
+                return true;
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to load servers from localStorage:', e);
+    }
+    return false;
+}
+
 // Server Input Management
 function addServerRow(value = '') {
     const row = document.createElement('div');
     row.className = 'server-row';
     row.innerHTML = `
-                <input type="text" class="server-input" placeholder="http://hostname:11434" value="${value}">
-                <button class="btn btn-icon btn-danger remove-server" title="Remove server">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            `;
+        <input type="text" class="server-input" placeholder="http://hostname:11434" value="${escapeHtml(value)}">
+        <button class="btn btn-icon btn-danger remove-server" title="Remove server">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    `;
     serverInputsContainer.appendChild(row);
     updateRemoveButtons();
+    saveServers(); // Save after adding
 }
 
 function updateRemoveButtons() {
@@ -69,6 +114,14 @@ serverInputsContainer.addEventListener('click', (e) => {
         const row = e.target.closest('.server-row');
         row.remove();
         updateRemoveButtons();
+        saveServers(); // Save after removing
+    }
+});
+
+// Save servers when input values change
+serverInputsContainer.addEventListener('input', (e) => {
+    if (e.target.classList.contains('server-input')) {
+        saveServers();
     }
 });
 
@@ -460,4 +513,9 @@ document.addEventListener('keydown', (e) => {
         searchInput.blur();
         applyFilters();
     }
+});
+
+// Initialize: Load saved servers on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadServers();
 });
