@@ -519,3 +519,263 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('DOMContentLoaded', () => {
     loadServers();
 });
+
+// ============================================
+// Export Functionality
+// ============================================
+
+const exportDropdown = document.getElementById('exportDropdown');
+const exportBtn = document.getElementById('exportBtn');
+
+// Toggle export dropdown
+exportBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    exportDropdown.classList.toggle('open');
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    if (!exportDropdown.contains(e.target)) {
+        exportDropdown.classList.remove('open');
+    }
+});
+
+// Handle export menu item clicks
+document.querySelectorAll('.export-menu-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+        const format = e.currentTarget.dataset.format;
+        exportResults(format);
+        exportDropdown.classList.remove('open');
+    });
+});
+
+// Export filtered results in specified format
+function exportResults(format) {
+    if (filteredModels.length === 0) {
+        alert('No models to export. Fetch models first.');
+        return;
+    }
+
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const filename = `ollama-models-${timestamp}`;
+
+    switch (format) {
+        case 'json':
+            exportJSON(filename);
+            break;
+        case 'csv':
+            exportCSV(filename);
+            break;
+        case 'markdown':
+            exportMarkdown(filename);
+            break;
+        case 'clipboard':
+            copyToClipboard();
+            break;
+    }
+}
+
+// Export as JSON
+function exportJSON(filename) {
+    const exportData = {
+        exported_at: new Date().toISOString(),
+        total_models: filteredModels.length,
+        filters_applied: {
+            search: searchInput.value || null,
+            capabilities: Array.from(activeCapabilities),
+            families: Array.from(activeFamilies),
+            servers: Array.from(activeServers),
+            match_mode: matchAll ? 'all' : 'any'
+        },
+        models: filteredModels.map(model => ({
+            name: model.name,
+            server: model.server,
+            size: model.size,
+            size_formatted: model.size_formatted,
+            parameters: model.parameters || null,
+            quantization: model.quantization || null,
+            family: model.family || null,
+            capabilities: model.capabilities || [],
+            modified_at: model.modified_at || null
+        }))
+    };
+
+    downloadFile(
+        JSON.stringify(exportData, null, 2),
+        `${filename}.json`,
+        'application/json'
+    );
+}
+
+// Export as CSV
+function exportCSV(filename) {
+    const headers = [
+        'Name',
+        'Server',
+        'Size',
+        'Parameters',
+        'Quantization',
+        'Family',
+        'Capabilities',
+        'Modified At'
+    ];
+
+    const rows = filteredModels.map(model => [
+        escapeCsvField(model.name),
+        escapeCsvField(model.server),
+        escapeCsvField(model.size_formatted || ''),
+        escapeCsvField(model.parameters || ''),
+        escapeCsvField(model.quantization || ''),
+        escapeCsvField(model.family || ''),
+        escapeCsvField((model.capabilities || []).join('; ')),
+        escapeCsvField(model.modified_at || '')
+    ]);
+
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.join(','))
+    ].join('\n');
+
+    downloadFile(csvContent, `${filename}.csv`, 'text/csv');
+}
+
+// Escape CSV field (handle commas, quotes, newlines)
+function escapeCsvField(field) {
+    if (field === null || field === undefined) return '""';
+    const str = String(field);
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+}
+
+// Export as Markdown
+function exportMarkdown(filename) {
+    const lines = [
+        '# Ollama Models Export',
+        '',
+        `**Exported:** ${new Date().toLocaleString()}`,
+        `**Total Models:** ${filteredModels.length}`,
+        ''
+    ];
+
+    // Add filter info if any filters are active
+    if (searchInput.value || activeCapabilities.size > 0 || activeFamilies.size > 0 || activeServers.size > 0) {
+        lines.push('## Filters Applied');
+        lines.push('');
+        if (searchInput.value) {
+            lines.push(`- **Search:** ${searchInput.value}`);
+        }
+        if (activeCapabilities.size > 0) {
+            lines.push(`- **Capabilities (${matchAll ? 'ALL' : 'ANY'}):** ${Array.from(activeCapabilities).join(', ')}`);
+        }
+        if (activeFamilies.size > 0) {
+            lines.push(`- **Families:** ${Array.from(activeFamilies).join(', ')}`);
+        }
+        if (activeServers.size > 0) {
+            lines.push(`- **Servers:** ${Array.from(activeServers).join(', ')}`);
+        }
+        lines.push('');
+    }
+
+    lines.push('## Models');
+    lines.push('');
+    lines.push('| Name | Server | Size | Parameters | Family | Capabilities |');
+    lines.push('|------|--------|------|------------|--------|--------------|');
+
+    filteredModels.forEach(model => {
+        const capabilities = (model.capabilities || []).map(c => `\`${c}\``).join(' ') || '-';
+        const serverHost = extractHost(model.server);
+        lines.push(
+            `| ${model.name} | ${serverHost} | ${model.size_formatted || '-'} | ${model.parameters || '-'} | ${model.family || '-'} | ${capabilities} |`
+        );
+    });
+
+    lines.push('');
+    lines.push('---');
+    lines.push('*Generated by [Ollama Model Explorer](https://github.com/yourusername/ollama-model-explorer)*');
+
+    downloadFile(lines.join('\n'), `${filename}.md`, 'text/markdown');
+}
+
+// Copy JSON to clipboard
+function copyToClipboard() {
+    const exportData = {
+        exported_at: new Date().toISOString(),
+        total_models: filteredModels.length,
+        models: filteredModels.map(model => ({
+            name: model.name,
+            server: model.server,
+            capabilities: model.capabilities || [],
+            family: model.family || null,
+            parameters: model.parameters || null
+        }))
+    };
+
+    navigator.clipboard.writeText(JSON.stringify(exportData, null, 2))
+        .then(() => {
+            showToast('Copied to clipboard!');
+        })
+        .catch(err => {
+            console.error('Failed to copy:', err);
+            alert('Failed to copy to clipboard');
+        });
+}
+
+// Extract hostname from URL for cleaner display
+function extractHost(url) {
+    try {
+        return new URL(url).host;
+    } catch {
+        return url;
+    }
+}
+
+// Download file helper
+function downloadFile(content, filename, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showToast(`Downloaded ${filename}`);
+}
+
+// Toast notification
+function showToast(message) {
+    // Remove existing toast if any
+    const existingToast = document.querySelector('.toast');
+    if (existingToast) {
+        existingToast.remove();
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // Trigger animation
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Keyboard shortcut for export (Ctrl/Cmd + E)
+document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'e') {
+        e.preventDefault();
+        if (filteredModels.length > 0) {
+            exportDropdown.classList.toggle('open');
+        }
+    }
+});
