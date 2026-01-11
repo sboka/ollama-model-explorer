@@ -78,9 +78,17 @@ class TestIndexEndpoint:
 class TestFetchEndpoint:
     """Tests for the fetch models API endpoint."""
 
-    def test_fetch_requires_json(self, client):
-        """Test that fetch endpoint requires JSON."""
+    def test_fetch_requires_json_content_type(self, client):
+        """Test that fetch endpoint requires JSON content type."""
         response = client.post("/api/fetch")
+        # Flask returns 415 when Content-Type is not application/json
+        assert response.status_code == 415
+
+    def test_fetch_requires_valid_json(self, client):
+        """Test that fetch endpoint requires valid JSON body."""
+        response = client.post(
+            "/api/fetch", data="not valid json", content_type="application/json"
+        )
         assert response.status_code == 400
 
     def test_fetch_requires_servers(self, client):
