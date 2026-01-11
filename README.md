@@ -7,13 +7,30 @@ A modern web application for exploring and filtering models across multiple Olla
 ```
 ollama-models-explorer/
 ├── app.py
+├── config.py
+├── wsgi.py
 ├── static/
 │   ├── script.js
 │   └── style.css
 ├── templates/
 │   └── index.html
-├── README.md
-└── requirements.txt
+├── scripts/
+│   ├── run.sh
+│   ├── run.bat
+│   └── run.ps1
+├── tests/
+│   ├── __init__.py
+│   └── test_app.py
+├── .env.example
+├── .gitignore
+├── Dockerfile
+├── docker-compose.yml
+├── Makefile
+├── pyproject.toml
+├── requirements.txt
+├── requirements-dev.txt
+├── LICENSE
+└── README.md
 ```
 
 ## Files
