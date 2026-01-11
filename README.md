@@ -1,6 +1,10 @@
-# Ollama Model Explorer
+# 🦙 Ollama Model Explorer
 
-A modern web application for exploring and filtering models across multiple Ollama servers.
+A modern, responsive web application for exploring and filtering AI models across multiple Ollama servers.
+
+![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
+![Flask](https://img.shields.io/badge/flask-2.3+-green.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ## Project Structure
 
@@ -33,95 +37,43 @@ ollama-models-explorer/
 └── README.md
 ```
 
-## Files
 
-### `requirements.txt`
+## ✨ Features
 
-```
-flask>=2.3.0
-```
+- **Multi-Server Support**: Connect to multiple Ollama servers simultaneously
+- **Real-time Filtering**: Filter models by capabilities, family, and server
+- **Smart Search**: Full-text search across model names
+- **Capability Matching**: Toggle between AND/OR matching for capabilities
+- **Responsive Design**: Works on desktop, tablet, and mobile
+- **Dark Theme**: Modern, eye-friendly dark interface
+- **Persistent Settings**: Server list saved across browser sessions
+- **Grid/List Views**: Switch between card and list layouts
+- **Sorting Options**: Sort by name, size, or modification date
 
-### `app.py`
+## 🚀 Quick Start
 
-```python
-#!/usr/bin/env python3
-"""
-Ollama Model Explorer - A web application for exploring and filtering
-models across multiple Ollama servers.
-"""
+### Prerequisites
 
-if __name__ == "__main__":
-    import argparse
-    
-    parser = argparse.ArgumentParser(description="Ollama Model Explorer Web Application")
-    parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")
-    parser.add_argument("--port", type=int, default=5000, help="Port to bind to")
-    parser.add_argument("--debug", action="store_true", help="Enable debug mode")
-    
-    args = parser.parse_args()
-    
-    print(f"Starting Ollama Model Explorer on http://{args.host}:{args.port}")
-    app.run(host=args.host, port=args.port, debug=args.debug)
-```
-
-### `templates/index.html`
-
-## Usage
+- Python 3.8 or higher
+- One or more Ollama servers running
 
 ### Installation
 
 ```bash
-# Create project directory
-mkdir ollama-explorer
-cd ollama-explorer
+# Clone the repository
+git clone https://github.com/yourusername/ollama-model-explorer.git
+cd ollama-model-explorer
 
-# Create virtual environment (optional but recommended)
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Create virtual environment
+python -m venv .venv
+
+# Activate virtual environment
+# On Linux/macOS:
+source .venv/bin/activate
+# On Windows (CMD):
+.venv\Scripts\activate.bat
+# On Windows (PowerShell):
+.venv\Scripts\Activate.ps1
 
 # Install dependencies
-pip install flask
-
-# Create the directory structure and files as shown above
-mkdir templates
-# Copy app.py to the root directory
-# Copy index.html to templates/
-```
-
-### Running the Application
-
-```bash
-# Basic run
-python app.py
-
-# With custom host and port
-python app.py --host 127.0.0.1 --port 8080
-
-# With debug mode
-python app.py --debug
-```
-
-Then open your browser to `http://localhost:5000`
-
-## Features
-
-1. **Multi-Server Support**: Add multiple Ollama server URLs and fetch models from all of them
-2. **Dynamic Capability Filtering**: Filter by any capability the models report (completion, vision, tools, embedding, insert, or any future capability)
-3. **Family Filtering**: Filter by model family (llama, qwen, gemma, etc.)
-4. **Server Filtering**: Filter by source server
-5. **Search**: Full-text search on model names
-6. **Match Mode Toggle**: Switch between "Any" (OR) and "All" (AND) matching for capability filters
-7. **Sorting**: Sort by name, size, or modification date
-8. **View Toggle**: Switch between grid and list views
-9. **Responsive Design**: Works on desktop and mobile devices
-10. **Real-time Filtering**: All filters apply instantly without page reload
-
-## Screenshot Preview
-
-The application features a modern dark theme with:
-- Gradient header branding
-- Card-based model display with capability tags
-- Pill-style filter chips
-- Smooth hover animations
-- Color-coded capability badges
-- Responsive design
+pip install -r requirements.txt
