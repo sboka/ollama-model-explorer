@@ -1,7 +1,7 @@
 # Ollama Model Explorer - Minimal Alpine Dockerfile
 
 # Build stage
-FROM python:3.12-alpine AS builder
+FROM python:3.13-alpine AS builder
 
 WORKDIR /app
 
@@ -28,9 +28,12 @@ RUN pip install --no-cache-dir --upgrade pip && \
     find /opt/venv -type d -name "test" -exec rm -rf {} + 2>/dev/null || true
 
 # Production stage
-FROM python:3.12-alpine AS production
+FROM python:3.13-alpine AS production
 
 WORKDIR /app
+
+# socat is small and doesn't need special kernel capabilities
+RUN apk add --no-cache socat
 
 # Create non-root user
 RUN addgroup -g 1000 appgroup && \
